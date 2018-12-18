@@ -32,6 +32,8 @@ class ViewController: UIViewController {
             let attr = EmojiPrase.findEmojiAttr(emojiText: text, font: (self?.textLabel.font)!)
             self?.textLabel.attributedText = attr
         }
+        emojiInput.placeHolder = "请输入内容"
+        
         view.addSubview(emojiInput)
         emojiInput.snp.makeConstraints { (make) in
             make.left.equalTo(0)
@@ -40,9 +42,9 @@ class ViewController: UIViewController {
         }
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        emojiInput.closeEmojikeyBoard()
-    }
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        emojiInput.closeEmojikeyBoard()
+//    }
 }
 
 

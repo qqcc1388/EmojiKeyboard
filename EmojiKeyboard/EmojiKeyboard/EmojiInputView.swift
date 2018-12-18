@@ -14,12 +14,42 @@ class EmojiInputView: UIControl {
     /// 点击键盘发送block回调
     var emojiReturnBlock: ((String)->Void)?
     
-    /// 输入框上一次的高度
-    private var last: CGFloat = 30
+    /// 字体大小
+    var textFont: UIFont = .systemFont(ofSize: 14){
+        didSet{
+            textView.font = textFont
+            placeHolderLabel.font = textFont
+        }
+    }
     
+    /// 字体颜色
+    var textColor: UIColor = .black {
+        didSet{
+            textView.textColor = textColor
+        }
+    }
+    
+    /// 设置placeHolder
+    var placeHolder: String? {
+        didSet{
+            placeHolderLabel.text = placeHolder
+        }
+    }
+    
+    /// placeHolder颜色设置
+    var placeHolderColor: UIColor = .gray {
+        didSet{
+            placeHolderLabel.textColor = placeHolderColor
+        }
+    }
+    
+    /// 配置键盘的默认参数
     private let keyBoardDefaultHeight: CGFloat = 30
     private let keyBoardMaxheight: CGFloat = 60
-    private let emojiViewHeight: CGFloat = 200
+    private let emojiViewHeight: CGFloat = 250
+    
+    /// 输入框上一次的高度
+    private var last: CGFloat = 30
     
     private lazy var textView: UITextView = {
         let textView = UITextView()
@@ -41,6 +71,7 @@ class EmojiInputView: UIControl {
     private lazy var placeHolderLabel: UILabel = {
         let label = UILabel()
         label.font = textView.font
+        label.textColor = UIColor.gray
         return label
     }()
     
@@ -60,9 +91,9 @@ class EmojiInputView: UIControl {
         return btn
     }()
 
-    private lazy var emojiView: EmojiCollectionView = {
+    private lazy var emojiView: EmojiView = {
         let size = UIScreen.main.bounds.size
-        let v = EmojiCollectionView(frame: CGRect(x: 0, y: 0, width: size.width, height: emojiViewHeight)){ [weak self] model in
+        let v = EmojiView(frame: CGRect(x: 0, y: 0, width: size.width, height: emojiViewHeight)){ [weak self] model in
             self?.showEmojiText(emojModel: model)
         }
         v.backgroundColor = UIColor(red: 246/255.0, green: 246/255.0, blue: 246/255.0, alpha:1)
@@ -96,6 +127,7 @@ class EmojiInputView: UIControl {
         addSubview(emojiBtn)
         addSubview(sendBtn)
         addSubview(emojiView)
+        textView.addSubview(placeHolderLabel)
         
         //textView
         textView.snp.makeConstraints { (make) in
@@ -104,6 +136,12 @@ class EmojiInputView: UIControl {
             make.top.equalTo(5)
             make.height.greaterThanOrEqualTo(keyBoardDefaultHeight)
             make.height.lessThanOrEqualTo(keyBoardMaxheight)
+        }
+        
+        placeHolderLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(textView.textContainer.lineFragmentPadding)
+            make.centerY.equalToSuperview()
+            make.height.equalTo(keyBoardDefaultHeight)
         }
     
         //emojiBtn
@@ -283,9 +321,11 @@ class EmojiInputView: UIControl {
         let view = super.hitTest(point, with: event)
         if view == nil {
             for subview in emojiView.subviews {
-                let myPoint = subview.convert(point, from: self)
-                if subview.bounds.contains(myPoint){
-                    return subview
+                for v in subview.subviews{
+                    let myPoint = v.convert(point, from: self)
+                    if v.bounds.contains(myPoint){
+                        return v
+                    }
                 }
             }
         }
@@ -318,6 +358,7 @@ extension EmojiInputView: UITextViewDelegate{
                 textView.scrollRangeToVisible(NSRange(location: textView.attributedText.length, length: 1))
             }
         }
+        placeHolderLabel.isHidden = textView.text.count > 0
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
