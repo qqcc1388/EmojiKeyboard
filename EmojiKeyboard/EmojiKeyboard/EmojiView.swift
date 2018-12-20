@@ -11,6 +11,9 @@ import UIKit
 let row: Int = 4   //行
 let col: Int = 8   //列
 
+let screenWidth = UIScreen.main.bounds.size.width
+
+
 class EmojiView: UIView {
     
     /// 表情键盘点击回调block
@@ -34,8 +37,6 @@ class EmojiView: UIView {
        let pageControl = UIPageControl()
         pageControl.pageIndicatorTintColor = .blue
         pageControl.currentPageIndicatorTintColor = .red
-        pageControl.numberOfPages = 5
-        pageControl.currentPage = 1
         return pageControl
     }()
     
@@ -43,6 +44,8 @@ class EmojiView: UIView {
         super.init(frame: frame)
         emojiBlock = selectedEmoji
         setupUI()
+        scrollViewDidEndDecelerating(collectionView)
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -95,14 +98,6 @@ extension EmojiView: UICollectionViewDelegate,UICollectionViewDataSource {
         let emojiPackage = emojiManager.emojiPackages[indexPath.section]
         let model = emojiPackage.emojis[indexPath.row]
         cell.model = model
-        
-        //确定分了多少页
-//        let count = emojiPackage.emojis.count / (row*col)
-//        pageControl.numberOfPages = count
-        //确定当第多少页
-        
-//        print("indexPath: row:\(indexPath.row) section:\(indexPath.section)")
-        
         return cell
     }
 
@@ -111,14 +106,32 @@ extension EmojiView: UICollectionViewDelegate,UICollectionViewDataSource {
         let model = emojiPackage.emojis[indexPath.row]
         emojiBlock?(model)
     }
+    
+    /// 结束拖拽
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let section = collectionView.numberOfSections
+        var lastPage = 0
+        for i in 0..<section {
+            //每组有多少个item
+            let count = collectionView.numberOfItems(inSection: i)
+            //每组有多少个页
+            let page = count/(row*col)
+            //当前在第几组
+            //一共有多少页
+            lastPage = lastPage + page
+        }
+        //当前第多少页
+        let currentPage = Int(scrollView.contentOffset.x/screenWidth)
+        
+        pageControl.currentPage = currentPage
+        pageControl.numberOfPages = lastPage
+    }
 }
 
 class EmojiFlowLayout: UICollectionViewFlowLayout {
     
-//    let row: Int = 4   //行
-//    let col: Int = 8   //列
-    
     var attributesArr: [UICollectionViewLayoutAttributes] = []
+    var lastPage: Int = 0
 
     override func prepare() {
         super.prepare()
@@ -128,7 +141,6 @@ class EmojiFlowLayout: UICollectionViewFlowLayout {
         minimumLineSpacing = 0
         minimumInteritemSpacing = 0
         scrollDirection = .horizontal
-        let screenWidth = UIScreen.main.bounds.size.width
         let width = screenWidth/CGFloat(col)
         itemSize = CGSize(width: width, height: width)
         let bmHeight = collectionView!.bounds.size.height - width*CGFloat(row)
@@ -140,7 +152,7 @@ class EmojiFlowLayout: UICollectionViewFlowLayout {
         var page = 0
         //获取section的数量
         let section = collectionView?.numberOfSections ?? 0
-        var lastPage = 0
+        lastPage = 0
         for i in 0..<section {
             
             //获取每页item的个数
@@ -167,9 +179,14 @@ class EmojiFlowLayout: UICollectionViewFlowLayout {
 //                print(attributes)
             }
             lastPage = lastPage + count/(row*col)
-
         }
     }
+    
+    override var collectionViewContentSize: CGSize{
+        let size: CGSize = super.collectionViewContentSize
+        return CGSize(width: CGFloat(lastPage)*screenWidth, height: size.height)
+    }
+    
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         return self.attributesArr
     }
