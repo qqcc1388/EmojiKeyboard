@@ -12,6 +12,12 @@
 		</dict>
 		<dict>
 			<key>name</key>
+			<string>火星圈</string>
+			<key>id</key>
+			<string>com.hxq.emoji</string>
+		</dict>
+		<dict>
+			<key>name</key>
 			<string>新浪表情</string>
 			<key>id</key>
 			<string>com.sina.emoji</string>
