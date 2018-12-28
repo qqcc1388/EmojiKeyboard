@@ -1,5 +1,11 @@
 
 [TOC]
+
+demo图片：
+<div style="text-align:left">
+<img src="https://img2018.cnblogs.com/blog/950551/201812/950551-20181228172408309-1841290878.png" width="45%" height="45%">   <img src="https://img2018.cnblogs.com/blog/950551/201812/950551-20181228172417878-2102324638.png" width="45%" height="45%">
+</div>
+
 ### 输入框
 - 为了让输入框能够随着用户输入内容变化自动变化高度，这里的输入框使用UITextView来实现，监听textView的代理，当输入内容发生改变的时候计算当前输入的宽高，给予textView一个最小高度一个最大高度，当高度超过最大高度时，让textView滚动起来
 ```
